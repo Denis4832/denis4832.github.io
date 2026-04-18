@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Подарок за отзыв</title>
+<meta content="dark" name="color-scheme"/>
+<meta content="#ff4fb9" name="theme-color"/>
+<link rel="icon" href="./favicon.ico" sizes="any">
+<link rel="shortcut icon" href="./favicon.ico" type="image/x-icon">
+<link rel="apple-touch-icon" href="./favicon.ico">
+
+<style>
+    :root {
+      --bg-1: #050308;
+      --bg-2: #0c0611;
+      --bg-3: #140816;
+      --pink: #ff4fb9;
+      --pink-2: #ff92d7;
+      --pink-soft: rgba(255, 79, 185, 0.18);
+      --pink-line: rgba(255, 79, 185, 0.12);
+      --violet: #b66dff;
+      --text: rgba(255,255,255,0.94);
+      --muted: rgba(255,255,255,0.70);
+      --card-border: rgba(255,255,255,0.08);
+      --shadow: 0 20px 80px rgba(0,0,0,0.42);
+    }
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255, 79, 185, 0.12), transparent 24%),
+        radial-gradient(circle at 85% 12%, rgba(182, 109, 255, 0.10), transparent 22%),
+        radial-gradient(circle at 70% 78%, rgba(255, 79, 185, 0.08), transparent 24%),
+        linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 45%, var(--bg-3) 100%);
+      color: var(--text);
+      overflow-x: hidden;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      text-align: center;
+    }
+    #bg-canvas, .bg-noise, .bg-orb { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+    #bg-canvas { width: 100%; height: 100%; }
+    .bg-noise {
+      opacity: 0.14;
+      background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 28px 28px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.35));
+    }
+    .bg-orb { border-radius: 999px; filter: blur(70px); opacity: 0.20; animation: orbFloat 7s ease-in-out infinite alternate; }
+    .bg-orb.orb-1 { width: 340px; height: 340px; top: -70px; left: -80px; background: #ff4fb9; animation-delay: -1.5s; }
+    .bg-orb.orb-2 { width: 260px; height: 260px; top: 90px; left: auto; right: -50px; background: #b66dff; animation-delay: -3.2s; }
+    .bg-orb.orb-3 { width: 280px; height: 280px; top: auto; bottom: -70px; left: auto; right: 12%; background: #ff4fb9; animation-delay: -2.1s; }
+    @keyframes orbFloat { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(18px,-14px,0) scale(1.06); } }
+    .site-content { position: relative; z-index: 1; width: min(940px, calc(100% - 28px)); margin: 0 auto; padding: 34px 0 56px; }
+    .page-card { position: relative; background: linear-gradient(180deg, rgba(15, 10, 20, 0.80), rgba(9, 6, 13, 0.72)); border: 1px solid var(--card-border); border-radius: 28px; box-shadow: var(--shadow); backdrop-filter: blur(12px); overflow: hidden; }
+    .page-card::before { content: ""; position: absolute; inset: 0; background: radial-gradient(circle at top right, rgba(255, 79, 185, 0.08), transparent 24%), radial-gradient(circle at bottom left, rgba(182, 109, 255, 0.08), transparent 22%); pointer-events: none; }
+    .hero { position: relative; padding: 36px 28px 20px; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .hero h1 { margin: 0; font-size: clamp(2rem, 3vw, 2.85rem); line-height: 1.05; letter-spacing: -0.03em; text-wrap: balance; }
+    .author-row { margin-top: 14px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--muted); }
+    .author-link { color: var(--pink-2); text-decoration: none; font-weight: 700; letter-spacing: 0.01em; transition: color 0.18s ease, transform 0.18s ease, text-shadow 0.18s ease; }
+    .author-link:hover { color: #ffd1ec; text-shadow: 0 0 16px rgba(255, 79, 185, 0.45); transform: translateY(-1px); }
+    .article-content { position: relative; padding: 26px 22px 34px; }
+    .intro { margin: 0 auto 24px; width: min(720px, 100%); padding: 14px 16px; border-radius: 18px; background: rgba(255, 79, 185, 0.08); border: 1px solid rgba(255, 79, 185, 0.14); color: #ffe6f6; font-size: 1.06rem; text-align: center; }
+    .section { margin-top: 24px; }
+    .section-title { margin: 0 0 14px; font-size: clamp(1.25rem, 2vw, 1.55rem); color: #ffdff3; letter-spacing: -0.02em; }
+    .item-link { display: block; width: min(760px, 100%); margin: 10px auto 0; padding: 15px 18px; border-radius: 18px; text-decoration: none; color: var(--text); background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.03)); border: 1px solid rgba(255,255,255,0.075); box-shadow: 0 10px 28px rgba(0,0,0,0.24); transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease; }
+    .item-link:hover { transform: translateY(-2px); border-color: rgba(255, 79, 185, 0.26); background: linear-gradient(180deg, rgba(255,255,255,0.075), rgba(255,255,255,0.04)); box-shadow: 0 16px 30px rgba(0,0,0,0.28); }
+    .item-text { display: block; font-weight: 700; line-height: 1.35; text-wrap: balance; }
+    .badge, .vpn-badge { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; padding: 6px 10px; border-radius: 999px; font-size: 0.84rem; font-weight: 700; letter-spacing: 0.01em; }
+    .badge { background: rgba(255, 79, 185, 0.12); border: 1px solid rgba(255,79,185,0.23); color: #ffe2f4; }
+    .vpn-badge { background: rgba(182, 109, 255, 0.13); border: 1px solid rgba(182,109,255,0.26); color: #f1e4ff; }
+    .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(18px); padding: 12px 16px; border-radius: 999px; background: rgba(12, 8, 18, 0.92); color: #fff; border: 1px solid rgba(255,255,255,0.10); box-shadow: 0 10px 30px rgba(0,0,0,0.35); z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.22s ease, transform 0.22s ease; }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .modal { position: fixed; inset: 0; z-index: 50; display: none; }
+    .modal.open { display: block; }
+    .modal-backdrop { position: absolute; inset: 0; background: rgba(4, 3, 7, 0.72); backdrop-filter: blur(10px); }
+    .modal-panel { position: relative; width: min(900px, calc(100% - 24px)); max-height: calc(100vh - 24px); margin: 12px auto; overflow: auto; border-radius: 24px; background: linear-gradient(180deg, rgba(16, 11, 22, 0.96), rgba(10, 7, 15, 0.97)); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 30px 80px rgba(0,0,0,0.45); padding: 26px 18px 22px; text-align: center; }
+    .modal-close { position: sticky; top: 0; margin-left: auto; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #fff; font-size: 1.4rem; cursor: pointer; }
+    .modal-title { margin: 6px 0 18px; font-size: clamp(1.45rem, 2.8vw, 2rem); color: #ffe7f7; }
+    .modal-content { width: min(760px, 100%); margin: 0 auto; color: var(--text); line-height: 1.55; }
+    .modal-content p, .modal-content h2, .modal-content h3, .modal-content h4, .modal-content pre, .modal-content blockquote { margin: 0 auto 12px; white-space: pre-wrap; }
+    .modal-content h2, .modal-content h3, .modal-content h4 { color: #ffd6ef; }
+    .modal-content a { color: #ffd2ed; word-break: break-word; }
+    .modal-list { list-style-position: inside; padding: 0; margin: 0 auto 12px; }
+    .modal-list li { margin: 0 auto 10px; }
+    .modal-actions { margin-top: 16px; }
+    .origin-btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: 999px; text-decoration: none; color: #fff; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.10); }
+    .origin-btn:hover { background: rgba(255,255,255,0.08); }
+    .inline-vpn { display: inline-flex; margin-left: 8px; padding: 3px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: rgba(182, 109, 255, 0.13); border: 1px solid rgba(182,109,255,0.26); color: #f1e4ff; vertical-align: middle; }
+    .inline-vpn-note { margin-top: 6px; color: #e5cbff; font-size: 0.92rem; }
+    @media (max-width: 640px) { .hero { padding: 30px 18px 18px; } .article-content { padding: 22px 14px 28px; } .item-link { padding: 14px 14px; border-radius: 16px; } .modal-panel { padding: 18px 12px 18px; } }
+  
+    .inline-vpn-note { display: none !important; }
+    .origin-vpn-badge { margin-left: 10px; }
+    .origin-btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+<div class="bg-noise"></div>
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+<div class="site-content">
+<main class="page-card">
+<header class="hero">
+<h1>Подарок за отзыв</h1>
+<div class="author-row"><a class="author-link" href="https://funpay.com/users/12266274/" rel="noopener noreferrer" target="_blank">Pomidor22805</a></div>
+</header>
+<div class="article-content">
+
+<section class="section"><a class="item-link modal-link" data-modal="modal-pc" href="#"><span class="item-text">ОПТИМИЗАЦИЯ PC</span></a><a class="item-link modal-link" data-modal="modal-android" href="#"><span class="item-text">ОПТИМИЗАЦИЯ ANDROID</span></a><a class="item-link modal-link" data-modal="modal-iphone" href="#"><span class="item-text">ОПТИМИЗАЦИЯ iPhone</span></a></section><section class="section"><h2 class="section-title">Minecraft</h2><a class="item-link modal-link" data-modal="modal-100-funtime" href="#"><span class="item-text">Способ зароботка 100кк+ в час FunTime</span></a><a class="item-link download-link" data-download-url="https://downloader.disk.yandex.ru/disk/62a75277c576a01b0a9481b2d6b3d1fb46d69ac232c288252736bd31740d3c9a/69e3461a/9Zv4PphU2pkxuG3EGm6qWwXfZ2T_vwS774pepEh-isJxLjWjDL8sdtJMP6I07FPZ7XN6lO8x1mHVXnOMblQ4BA%3D%3D?uid=0&amp;filename=%D0%A0%D0%9F%204.zip&amp;disposition=attachment&amp;hash=aa/jfNSpl6Avz00TkTCsdAmx19ZVtM3JlruM2Mn3ak//c9Vz8XS6OaEaRO80DpReq/J6bpmRyOJonT3VoXnDag%3D%3D&amp;limit=0&amp;content_type=application%2Fzip&amp;owner_uid=657865358&amp;fsize=19445258&amp;hid=735346137cb89e6a4509110a7c9fcc10&amp;media_type=compressed&amp;tknv=v3" data-filename="РП 4.zip" href="https://downloader.disk.yandex.ru/disk/62a75277c576a01b0a9481b2d6b3d1fb46d69ac232c288252736bd31740d3c9a/69e3461a/9Zv4PphU2pkxuG3EGm6qWwXfZ2T_vwS774pepEh-isJxLjWjDL8sdtJMP6I07FPZ7XN6lO8x1mHVXnOMblQ4BA%3D%3D?uid=0&amp;filename=%D0%A0%D0%9F%204.zip&amp;disposition=attachment&amp;hash=aa/jfNSpl6Avz00TkTCsdAmx19ZVtM3JlruM2Mn3ak//c9Vz8XS6OaEaRO80DpReq/J6bpmRyOJonT3VoXnDag%3D%3D&amp;limit=0&amp;content_type=application%2Fzip&amp;owner_uid=657865358&amp;fsize=19445258&amp;hid=735346137cb89e6a4509110a7c9fcc10&amp;media_type=compressed&amp;tknv=v3" rel="noopener noreferrer" target="_blank"><span class="item-text">Топовый рп+звуки</span><span class="badge">ZIP</span></a><a class="item-link" href="https://mega.nz/file/0acCyRQA#QSahroO0Y4O3HG27xUQEt5bzvMsZET3slnRxl2QTN7w" rel="noopener noreferrer" target="_blank"><span class="item-text">Рп на 18ГБ</span><span class="badge">ZIP</span></a><a class="item-link modal-link" data-modal="modal-4-5" href="#"><span class="item-text">ОБХОД 4.5 ФАНТАЙМ</span></a></section><section class="section"><h2 class="section-title">Among Us</h2><a class="item-link modal-link" data-modal="modal-among-us" href="#"><span class="item-text">ГАЙД ДЛЯ НОВИЧКОВ ПО ИГРЕ AMONG US</span></a></section><section class="section"><h2 class="section-title">𝗕rawl Stars</h2><a class="item-link" href="https://clck.ru/3DHQk6" rel="noopener noreferrer" target="_blank"><span class="item-text">ЭКСКЛЮЗИВНЫЙ ПИН "КЛОУН" ПО ССЫЛКЕ</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link" href="https://clck.ru/3DHQq6" rel="noopener noreferrer" target="_blank"><span class="item-text">ЭКСКЛЮЗИВНЫЙ ПИН "СКЕЛЕТ-ГРЕЙ" ПО ССЫЛКЕ</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link" href="https://clck.ru/3DHSEp" rel="noopener noreferrer" target="_blank"><span class="item-text">ЭКСКЛЮЗИВНЫЙ ПИН "ЭМОДЗИ СО СПРЕЕМ" ПО ССЫЛКЕ</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link modal-link" data-modal="modal-supercell" href="#"><span class="item-text">Как написать в поддержку Supercell</span></a></section><section class="section"><h2 class="section-title">𝗕𝗹𝗮𝗰𝗸 𝗥𝘂𝘀𝘀𝗶𝗮</h2><a class="item-link" href="https://clck.ru/3DHSNj" rel="noopener noreferrer" target="_blank"><span class="item-text">ГАЙД ПО ПЕРЕКУПСТВУ</span></a><a class="item-link" href="https://clck.ru/3DHSNK" rel="noopener noreferrer" target="_blank"><span class="item-text">КАК БЫСТРО ПОДНЯТЬ ЛВЛ</span></a><a class="item-link" href="https://clck.ru/3DHSM7" rel="noopener noreferrer" target="_blank"><span class="item-text">ШАБЛОН С ОБЗВОНА НА СС ОПГ</span></a></section><section class="section"><h2 class="section-title">𝐃𝐢𝐬𝐜𝐨𝐫𝐝</h2><a class="item-link" href="https://clck.ru/3DHSSD" rel="noopener noreferrer" target="_blank"><span class="item-text">ГОТОВЫЙ СЕРВЕР 𝗕𝗨𝗦𝗜𝗡𝗘𝗦𝗦</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link" href="https://clck.ru/3DHSUW" rel="noopener noreferrer" target="_blank"><span class="item-text">ГОТОВЫЙ СЕРВЕР 𝗙𝗥𝗜𝗘𝗡𝗗</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link" href="https://clck.ru/3DHSY3" rel="noopener noreferrer" target="_blank"><span class="item-text">ГОТОВЫЙ СЕРВЕР 𝐑𝐎𝐋𝐄𝐏𝐋𝐀𝐘</span><span class="vpn-badge">🔒 Только с VPN</span></a><a class="item-link modal-link" data-modal="modal-7-discord" href="#"><span class="item-text">СПОСОБЫ ПОЛУЧЕНИЯ 7 ЗНАЧКОВ В DISCORD</span></a><a class="item-link modal-link" data-modal="modal-20" href="#"><span class="item-text">ЛЮБОЙ ЗНАЧОК ГИЛЬДИИ 20 + ЗНАЧКОВ</span></a></section><section class="section"><h2 class="section-title">Прочее</h2><a class="item-link" href="http://castlots.org/generator-nikov-online/" rel="noopener noreferrer" target="_blank"><span class="item-text">Генератор ников</span></a><a class="item-link" href="https://clck.ru/3DZkp3" rel="noopener noreferrer" target="_blank"><span class="item-text">Пак аватарок</span></a><a class="item-link" href="https://drive.google.com/drive/folders/127k0ZmacDm0x9_E1iqJ8QnFMt0rkZsmd" rel="noopener noreferrer" target="_blank"><span class="item-text">ПАК 70К+ АВАТАРОК</span></a></section>
+</div>
+</main>
+</div>
+<div aria-hidden="true" class="modal" id="modal-pc">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-pc-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-pc-title">ОПТИМИЗАЦИЯ PC</h3>
+<div class="modal-content"><h4>1) Настройка визуальных эффектов:</h4><p>ПКМ по "Этот компьютер" - Свойства - Справа "Дополнительные параметры системы" - вкладка "Визуальные эффекты" - пункт "Быстродействие" - Жмем "Параметры", выставляем настройки согласно скриншоту.</p><h4>2) Отключаем XBOX DVR</h4><p>Очень сильно ест ФПС и вызывает ИНПУТ ЛАГ в игре.</p><p><a href="https://drive.google.com/file/d/1ANDYsNcbO3TQObdPqGrzVluo1PnjZGoC/view?usp=sharing" rel="noopener noreferrer" target="_blank">https://drive.google.com/file/d/1ANDYsNcbO3TQObdPqGrzVluo1PnjZGoC/view?usp=sharing</a></p><p>Качаем, запускаем и готово. XBOX DVR удален.</p><h4>3) Отключение лишних служб</h4><p>Крохотная программа, которая имеет несколько предустановок (safe, extreme etc). Выбираем extreme внизу, затем вкладку service - check all, далее File - Apply services (или Ctrl+S), перезагружаемся.</p><p><a href="https://drive.google.com/file/d/1pJinwLvpSpYpk8y9ZXKyunlPEeeWTqFI/view?usp=sharing" rel="noopener noreferrer" target="_blank">https://drive.google.com/file/d/1pJinwLvpSpYpk8y9ZXKyunlPEeeWTqFI/view?usp=sharing</a></p><p>Примерно так должно выглядеть:</p><h4>4) Отключаем телеметрию, удаляем Metro приложения</h4><p>DWS (Destroy Windows Spying). Настройки ставим как на скрине. ВНИМАНИЕ!: Не ставьте галочку "Добавить шпионские домены в hosts" - у вас перестанет работать Skype.</p><p>Жмем справа на большую кнопку "СКАЧАТЬ"</p><p>Ставим галочки как на скриншоте, переходим в "Главная'' и жмем "Destroy Windows".</p><p>Во вкладке "Утилиты" удаляем все win 10 metro, one driver, отключаем UAC, office 2016 telemetry и windows update по желанию, остальное обязательно.</p><h4>5) Настройки плана электропитания:</h4><p>Некоторые люди недооценивают данный пункт, а зря)</p><p>Пуск - Панель управления - Электропитание - Выбираем "Высокая производительность"</p><h4>6) CCleaner</h4><p>Все знают данную программу. Если виндовс была установлена давно, то скорее всего компьютер "засорился" и было бы не лишним почистить его.</p><p>Ссылку найдите в интернете</p><p>Обязательно не забудьте почистить реестр! А так же удалить все ненужные программы во вкладке TOOLS.</p><h4>7) Очищаем автозагрузку и не загружаем лишние сервисы:</h4><p>Нажимаем сочетание клавиш WIN+R, пишем msconfig.exe, переходим на вкладку "Службы", ставим галочку "Не отображать службы Microsoft", снимаем галочки со всего, чем не пользуемся, за исключением античитов и пр.</p><h4>8) Настройки звука Windows:</h4><p>Нажимаем ПКМ на значок динамика в трее (рядом с часами), выбираем "Устройства воспроизведения", выбираем устройство, которое вы используете по-умолчанию, жмем "Свойства" - вкладка "Дополнительно", выбираем 16бит 44100Гц, если присутствует вкладка с "улучшайзерами" жмем "отключить всё", аналогичную операцию проделываем для Записывающих устройств.</p><h4>9) Steam настройки:</h4><p>В настройках стима Interface - Enable DirectWrite снимаем галочку, так же отключаем все опции вроде трансляции (stream) и прочего, оставляем самый минимум.</p><h4>10) Общие советы:</h4><p>Не держите кучу запущенных программ во время игры, это все сказывается на производительности и инпутлаге, в особенности браузеры, razer synapse, logitech gaming software и прочие приблуды. Обычно мой трей выглядит вот так, чего и вам желаю:</p><h4>11) Рекомендую всегда использовать последние версии драйверов на любое оборудование:</h4><p>Nvidia diver (видеокарта)</p><p>AMD driver (видеокарта)</p><h4>12) Настройки в панели управления NVIDIA:</h4><p>Ставим все точно так же, как у меня. 100% взависимости от конфигурации вашего ПК это даст прирост. Кому-то 30, кому-то 50, кому-то 100 кадров)) Это, наверное, самый важный пункт именно для увеличения ФПС.</p><h4>13) Файл подкачки</h4><p>Мой компьютер - Жмем ПКМ и открываем свойства - Дополнительные параметры системы - Быстродействие жмем на "ПАРАМЕТРЫ" - Дополнительно - Изменить</p><p>Поставьте на системный диск 8 ГБ (8192 МБ). Даже если у вас 32+ ГБ ОЗУ, файл подкачки обязательно должен быть, хотя бы 2-4 ГБ минимум.</p><h4>14) Отключаем лишние устройства в диспетчере устройств:</h4><p>Нажимаем ПКМ на "Этот компьютер" - Диспетчер устройств - открываем например вкладку Звуковые, игровые и видеоустройства - видим Nvidia High Definition Audio - ПКМ - отключить. Так проделываем со всеми неиспользуемыми устройствами, если вы знаете, что делаете.</p><h4>15) AusLogics Disk Defrag</h4><p>Дефрагментатор жесткого диска, в разы быстрее дефолтного, бесплатный. Только не дефрагментируйте SSD ни в коем случае.</p><h4>16) AusLogics Registry Cleaner</h4><p>Обычная чистилка реестра, пока что не подводила, бесплатная.</p><h3>17) QUICK CPU</h3><p>SYSTEM POWER PLAN: Высокая производительность обязательно! Все ползунки на 100% как у меня</p><p>Данная программа не позволит простаивать ядрам вашего процессора и даст производительность во всех играх, где важна работа процессора. (Ссылку найдите в интернете)</p><h3>BIOS</h3><h4>ВНИМАНИЕ:</h4><p>Все настройки в данном разделе расчитаны на продвинутых пользователей, если вы не уверены в том, что вы делаете, лучше пропустите данный раздел. Помните, все что вы делаете - вы делаете на свой страх и риск! За последствия автор ответственности не несет.</p><h4>1) EIST, C-States etc.</h4><p>Энергосберегающие функции - выключаем, так как динамически изменяют частоту процессора, а с ней и производительность.</p><h4>2)Execute Disable Bit</h4><p>Выключаем.</p><h4>3) Intel Virtualization Technology</h4><p>Виртуализация не нужна на игровом компьютере, конечно, если вы не пользуетесь виртуальными машинами (VirtualBox etc).</p><h4>4) 1394 controller</h4><p>Выключаем.</p><h4>5) On-board audio</h4><p>Встроенный в материнскую плату звук рекомендуется отключить, если у вас есть отдельная звуковая карта, так как может вызывать большой инпут лаг на некоторых системах. ЕСЛИ НЕТ ЗВУКОВОЙ КАРТЫ ОТДЕЛЬНОЙ, ТО НЕ ТРОГАЙТЕ!</p><h4>6) On-board video</h4><p>Выключаем, потому что любой геймер имеет в своем ПК дискретную видеокарту. ЕСЛИ У ВАС НЕТ ВИДЕОКАРТЫ, А КАРТИНКА ВЫВОДИТСЯ С ВСТРОЕННОГО ВИДЕОЯДРА В ПРОЦЕССОРЕ, ТО НЕ ТРОГАЙТЕ!!!!!!!!</p><h4>7) Secondary LAN</h4><p>Если вдруг на вашем компьютере имеется две встроенных сетевухи - одну можно отключить, снижает инпут лаг.</p><h4>8) Overclocking</h4><p>Все написаное дальше не для новичков. Я не могу написать общее руководство для всех систем, но я бы с радостью это сделал. CS:GO положительно откликается на увеличение частоты процессора, порой увеличение на 400-600мгц может дать прибавку порядка 100фпс и поднять минимальные значения, увеличивая комфорт вашей игры. Положение дел такое, что имея Intel процессор с индексом K (4690k etc), достаточно зайти в BIOS, найти там опцию CPU Ratio и выставить желаемое значение. Cpu ratio умножается на частоту BCLK, то есть значение Cpu ratio 45 умноженное на BCLK 100 даст вам 4500Мгц, как правило для такого разгона изменение остальных опций не требуется, большинство материнских плат автоматически повышают напряжение до достаточного для работы на данной частоте, но если вы знаете, что делаете, можете выставить значение "руками". Даже не думайте браться за "разгон" имея установленный в системе "боксовый" кулер от Intel, все это можно делать, только если вы заранее приобрели нормальный башенный кулер. После разгона обязательно мониторьте температуру утилитами вроде RealTemp, AIDA64, MSI Afterburner и прочими на ваше усмотрение. Все, что вы делаете, вы делаете на свой страх и риск, помните об этом!</p><h3>Киберспортивное разрешение и настройки для любой игры</h3><p>Сегодня мы сравним соотношения сторон - 16:9 против 4:3, и приведем некоторые аргументы в пользу менее популярных настроек на 16:9.</p><p>Хотя аргументы в пользу 16: 9 не приведут к тому, что многие люди изменят свои игровые настройки, но мы хотя бы попытаемся разобраться, почему так много споров возникает между игроками на этой почве.</p><p>Во-первых, давайте взглянем на визуальные, мгновенно заметные различия между соотношением сторон 16:9 и 4:3 в игре:</p><ul class="modal-list"><li>16: 9 в целом расширяет видимость, а на 4:3 обрезается карта по сторонам, но горизонтальные линии остаются такими же. Поэтому сверху и снизу вы будете наблюдать одинаковую картину на обоих соотношениях.</li><li>Однако, если вы сравните горизонтальные края, вы заметите большую разницу - поле зрения (FOV) при соотношении сторон 16: 9 намного больше. Находясь в этой позиции, игрок, использующий разрешение 4:3, не увидит противника, выходящего из сторон, так как его обзор будет ограничен в обоих крайних горизонтальных точках монитора, в отличие от 16:9.</li></ul><p>В обычных играх может это и не имеет значения, но в соревнованиях за миллионы долларов игроки хотят выудить каждое преимущество, которое они могут получить, и даже увеличение на 5% может иметь значение. Давайте рассмотрим самые популярные высказывания по поводу этих двух соотношений в пользу 4:3:</p><h4>«4:3 стретчинг создает более крупные модели, которые легче увидеть»</h4><p>Плюсы действительно есть: легче целиться – противник визуально становится шире из-за деформации изображения и мышь начинает быстрее двигаться вбок, при этом сохраняя вертикальную скорость; Это расширение действительно увеличивает размер моделей игроков на вашем мониторе. Но часть, которая расширена, увеличивает физическую область, на которую нужно смотреть. По сравнению с использованием 4:3 с черными полосами по бокам. Другими словами, здесь побеждает «большой экран».</p><p>Если вы считаете, что это расширение полезнее только из-за наличия более крупных объектов, то подумайте о том, что по факту они находятся на увеличенной физической площади экрана. С таким же успехом можно думать, что наличие большего монитора является преимуществом в игре, поскольку он позволяет достичь той же цели. Аналогичным образом, использование растянутого изображения 4:3 фактически идентично большому монитору, так как использование монитора большего размера с соотношением сторон 16:9 с обрезкой части экрана сверху вниз, придает экрану растянутый вид. Если вы действительно считаете, что большой экран с 4:3 стретчингом дает больше преимущества, то это может фактически превзойти 16:9. Но если нет, то это не выдерживает никакой критики при любом раскладе.</p><h4>«Все лучшие игроки используют растяжку экрана на 4:3»</h4><p>Многие из про-игроков CS:GO играют на таком соотношении, потому что большинство профессионалов начинало свою карьеру ещё с игр, где в приоритете было соотношение 4:3. В Counter-Strike 1.6, который был привязан к 4:3, эффект обрезки был противоположным - использование 16:9 обрезало верх и низ игры, не влияя на горизонталь. Таким образом, все использовали разрешение 4:3 и перенесли свои привычки в CS:GO, после чего молодые игроки начали копировать настройки лучших игроков, и цикл продолжился.</p><h4>«FPS выше при воспроизведении с более низким разрешением, то есть 4:3»</h4><p>Это веский аргумент для фанатов и непрофессиональных игроков, но он не должен вызывать беспокойства у профессионалов, играющих на турнирах, где компьютеры могут справиться с любым разрешением без проблем.</p><p>Как объяснил Николай device Ридц в своем твиттере - внесенные изменения в настройки игры могут её усложнить, и вы можете потерять чувство игры. Однако суть этого поста не в этом. Каждый должен играть на том, что ему удобнее всего.</p><h4>CS:GO, Valorant, PUBG, Warface, RUST, WOT и т.д. Для любой игры где очень важно количество FPS ставим:</h4><p>1) Разрешение: 1280x960 4:3</p><p>2) ВСЕ настройки графики на минимум</p><p>3) Обязательно поставить в панели управления NVIDIA абсолютно каждую настройку как у меня</p><p>Всего 3 пункта, но дают максимальную производительность для ЛЮБОЙ игры.</p><h3>Заключение</h3><p>Также есть обязательные процедуры, такие как:</p><ul class="modal-list"><li>Физическая чистка ПК</li><li>Проверка системы на наличие вирусов</li></ul><p>Эти процедуры лучше производить на регулярной основе, к примеру - проверять систему на наличие вирусов каждую неделю, чистить пк каждые 4-6 месяцев.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/NASTROJKA-DLYA-PK-04-10" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-android">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-android-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-android-title">ОПТИМИЗАЦИЯ ANDROID</h3>
+<div class="modal-content"><p>НАСТРОЙКА ДЛЯ ТЕЛЕФОНА: 1. Обновите операционную систему. Часто разработчики выпускают обновления, которые содержат оптимизации и исправления ошибок, включая и те, которые могут повысить производительность. Убедитесь, что ваш телефон работает на самой последней версии Android.</p><p>2. Закройте фоновые приложения. Активные фоновые приложения могут потреблять ресурсы вашего телефона и ухудшать его производительность. Закройте все приложения, которые вам не нужны, перед запуском игры, чтобы освободить системные ресурсы.</p><p>3. Очистите кэш приложений. Кэш сохраняет временные данные приложений, что ведет к накоплению мусора и замедлению работы телефона. Очистка кэша поможет освободить память устройства и улучшить производительность.</p><p>4. Используйте специальные игровые режимы. Некоторые смартфоны имеют встроенные игровые режимы, которые оптимизируют работу устройства при запуске игр. Включите этот режим перед игрой, чтобы повысить производительность и улучшить игровой опыт.</p><p>5. Ограничьте количество активных процессов. Чем больше приложений и процессов работают на вашем телефоне, тем ниже будет его производительность. Ограничьте количество активных процессов, отключив автоматическое обновление приложений или убрав из трея ненужные уведомления.</p><p>6. Снизьте графические настройки. В некоторых играх можно изменить разрешение и уровень графики, чтобы улучшить производительность. Попробуйте уменьшить графические настройки в игре, чтобы повысить FPS.</p><p>7. Увеличьте производительность процессора. Некоторые смартфоны имеют режимы повышения производительности, которые могут ускорить работу процессора. Включите этот режим перед игрой, чтобы улучшить FPS.</p><p>8. Проверьте наличие вирусов. Вирусы и вредоносные программы могут замедлить работу вашего телефона и снизить производительность. Установите антивирусное приложение и проверьте устройство на наличие вредоносного ПО.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/NASTROJKA-DLYA-ANDROJDA-04-10" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-iphone">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-iphone-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-iphone-title">ОПТИМИЗАЦИЯ iPhone</h3>
+<div class="modal-content"><h3>ДЛЯ APPLE</h3><h3>1. Зарядите iPhone и не играйте с подключенной зарядкой</h3><p>Требовательные оффлайн игры и практически все игры по сети приводят к сильному нагреву смартфона. Если это совместить с нагревом аккумулятора во время зарядки, есть шанс поднять температуру гаджета слишком высоко.</p><p>Это негативно скажется на аккумуляторе iPhone. Работа при высокой температуре приведет к более быстрой деградации батареи, не удивляйтесь, когда через полгода увидите менее 90% емкости в настройках.</p><p>Лучше всего заряжайте смартфон заранее перед игровыми сессиями, а когда гаджет попросится на зарядку – сделайте перерыв в игре и подключите iPhone к адаптеру питания.</p><p>Что нужно настроить: при этом рекомендуем отключить оптимизированную зарядку. Опция находится по пути Настройки – Аккумулятор – Состояние аккумулятора . Так батарея всегда будет готова к нагрузке и заряжена до 100%.</p><h3>2. Снизьте яркость экрана до комфортного значения</h3><p>Часто хочется поиграть на смартфоне с максимальной яркостью экрана, но это, скорее всего, продлится недолго. Затем гаджет самостоятельно ограничит максимальную яркость, чтобы избежать перегрева.</p><p>Вы можете растянуть время работы с комфортной яркостью подсветки, если изначально отключите автоматическую регулировку и снизите параметр подсветки.</p><p>Что нужно настроить: перейдите в Настройки – Универсальный доступ – Дисплей и размер текста и отключите опцию Автояркость . Затем вручную измените яркость до 50-60% через Пункт управления .</p><h3>3. Освободите место на накопителе</h3><p>Мобильной операционной системе iOS всегда требуется 10-15% свободного на накопителе места для нормальной работы. Особенно это касается гаджетов с объемом памяти до 64 ГБ .</p><p>Сама игра в процессе может загружать дополнительный контент, уровни или необходимые для работы данные и занять минимум свободного места на диске.</p><blockquote>В тему: Как очистить место на iPhone. Собрали самые эффективные способы</blockquote><p>Для больших требовательных игр рекомендуем очистить минимум 2-4 ГБ места на диске смартфона помимо уже свободных 15% от общего объема.</p><p>Что нужно настроить: перейдите по пути Настройки – Основные – Хранилище iPhone и отслеживайте доступное место на смартфоне там.</p><h3>4. Отключите автозагрузку данных в системе</h3><p>Комфортной онлайн игре может помешать начавшаяся фоновая загрузка данных, обновление контента или установка какого-то приложения. Активным геймерам лучше отключить эти опции и производить все необходимые апдейты вручную между игровыми сессиями.</p><p>В противном случае фоновое обновление будет потреблять как ресурсы смартфона, так и расходовать трафик.</p><p>Что нужно настроить: отключите опции Автоматическая загрузка Приложений и ПО ( Настройки – App Store ) и Загрузка обновлений iOS ( Настройки – Основные – Обновление ПО – Автообновление ).</p><h3>5. Обеспечьте наилучшее подключение к сети</h3><p>iPhone давно умеет компенсировать лаги в работе беспроводного подключения при помощи мобильного интернета. Это избавит вас от дисконектов во время сетевых игр.</p><p>Кроме этого следует включить экономию трафика. Так вы минимизируете другие фоновые процессы обмена данными, что позволит получить максимальный пинг.</p><p>Что нужно настроить: активируйте опцию Экономия данных для Wi-Fi ( Настройки – Wi-Fi ), Экономия данных для LTE и Помощь Wi-Fi ( Настройки – Сотовая связь ).</p><h3>6. Настройте режим фокусирования для игр</h3><p>Кроме перечисленных выше параметров рекомендуем настроить специальный игровой режим. Сделать это можно при помощи блока настроек Фокусирование.</p><p>Это позволит минимизировать входящие уведомления, звонки и сообщения во время игр. Можно настроить автоматическое включение профиля во время старта нужных вам игр.</p><p>Что нужно настроить: перейдите в Настройки – Фокусирование – Видеоигры , в разделах Люди и Уведомления укажите программы и пользователей, которые смогут прорваться через режим фокусирования. Другие уведомления при этом будут заглушены.</p><p>Ниже можно настроить запуск профиля при подключении беспроводного геймпада, по времени или во время запуска определенных игр.</p><p>Так вы сможете с максимальным комфортом играть на смартфоне или планшете.</p><p>P.S. Если включить Режим энергосбережения по адресу Настройки -&gt; Аккумулятор или через шторку Пункта управления , вы снизите пиковую производительность процессора iPhone, но зато уменьшите его нагрев. В некоторых играх это даже может помочь с производительностью, так как порог сильного троттлинга видеочипа (замедления ради защиты от перегрева) наступит позже.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/NASTROJKA-DLYA-PRODUKCII-APPLE-04-10" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-100-funtime">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-100-funtime-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-100-funtime-title">Способ зароботка 100кк+ в час FunTime</h3>
+<div class="modal-content"><p>Заработок 100кк+ в час на Фантайм: способы и советы</p><p>1. Фермы:</p><p>• Грибные фермы:</p><p>o Плюсы: Автоматизированный, простой в настройке, стабильный доход.</p><p>o Минусы: Низкая доходность по сравнению с другими вариантами.</p><p>o Варианты: Автоматическая ферма красных мухоморов, ферма лисичек.</p><p>• Фермы эндерменов:</p><p>o Плюсы: Высокая доходность, возможность работать AFK.</p><p>o Минусы: Сложность в настройке, требует редких ресурсов.</p><p>o Варианты: Эндермен-ферма с варперами, простая эндермен-ферма.</p><p>• Фермы мобов:</p><p>o Плюсы: Доступность, простота настройки.</p><p>o Минусы: Относительно низкая доходность, требуют ручного сбора.</p><p>o Варианты: Спавн-ферма зомби/скелетов, ферма пауков.</p><p>2. PvP:</p><p>• Ганкинг:</p><p>o Плюсы: Быстрый способ заработать, не требует вложений.</p><p>o Минусы: Рискованно, требует PvP навыков.</p><p>• Рэйд:</p><p>o Плюсы: Шанс получить ценные луты, командная игра.</p><p>o Минусы: Требует организации, координации, PvP навыков.</p><p>• Дуэли:</p><p>o Плюсы: Честный способ PvP, возможность заработать очки на покупку вещей.</p><p>o Минусы: Нестабильный доход, зависит от удачи и навыков.</p><p>3. Торговля:</p><p>• Флип:</p><p>o Плюсы: Быстрый способ заработать, не требует вложений.</p><p>o Минусы: Требует знания рынка, удачи.</p><p>• Магазин:</p><p>o Плюсы: Стабильный доход, возможность работать AFK.</p><p>o Минусы: Требует стартового капитала, времени на обустройство.</p><p>• Продажа ресурсов:</p><p>o Плюсы: Доступность, простота.</p><p>o Минусы: Низкая доходность с некоторых ресурсов.</p><p>4. Прочие:</p><p>• Прохождение ивентов:</p><p>o Плюсы: Шанс получить ценные награды, уникальные предметы.</p><p>o Минусы: Не всегда доступны, требуют времени и усилий.</p><p>• Азартные игры:</p><p>o Плюсы: Быстрый шанс получить крупную сумму.</p><p>o Минусы: Высокий риск, шанс потерять все.</p><p>• Конкурсы:</p><p>o Плюсы: Шанс получить ценные призы без вложений.</p><p>o Минусы: Низкая вероятность победы, требуют выполнения условий.</p><p>Советы:</p><p>• Изучите рынок:</p><p>o Цены: Отслеживайте цены на ресурсы, предметы, услуги.</p><p>o Спрос: Узнайте, что пользуется спросом у игроков.</p><p>• Будьте хитры:</p><p>o Используйте акции: Следите за скидками, распродажами.</p><p>o Переговоры: Торгуйтесь при покупке/продаже товаров.</p><p>• Инвестируйте:</p><p>o Вложите в фермы/магазины: Получайте пассивный доход.</p><p>o Вложите в перспективные предметы: Продавайте дороже.</p><p>• Сотрудничайте:</p><p>o Создайте/вступите в клан: Делите ресурсы, защищайте друг друга.</p><p>o Торгуйте с другими игроками: Получайте доступ к редким товарам.</p><p>Помните:</p><p>• Заработок 100кк+ в час – это не всегда законно:</p><p>o Избегайте сомнительных схем, использования багов.</p><p>• Риск всегда есть:</p><p>o Не вкладывайте все свои средства в один проект.</p><p>• Главное – это получать удовольствие:</p><p>o Выберите способ заработка, который вам нравится.</p><p>Удачи на Фантайме!</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://clck.ru/3NKATw" rel="noopener noreferrer" target="_blank">Открыть оригинал</a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-4-5">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-4-5-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-4-5-title">ОБХОД 4.5 ФАНТАЙМ</h3>
+<div class="modal-content"><p>Способы обхода бана 4.5 Бан 4.5 выдается когда у вас уже есть заблокированные аккаунты, значит, вам нужно изменить ваш айпи. 1. Вам понадобится ваш роутер с интернетом, подойдите к нему и выключите его на кнопку на 2-3 минуты, если у его есть палочки, то можете чучуть поменять их направление. 2. ользуйте ВПН или же прокси. Я всегда пользуюсь перезагрузкой роутера (подойдет не всем ,только у кого динамический ip), и никогда не получал бан за 4.5. Спасибо за внимание. Уверен что вам поможет.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/OBHOD-45-FANTAJM-03-01" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-supercell">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-supercell-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-supercell-title">Как написать в поддержку Supercell</h3>
+<div class="modal-content"><p>Как обратиться в поддержку Brawl Stars: пошаговая инструкция и обход блокировки 🎮</p><p>Приветствую, brawlers! ✌️ Потеря аккаунта - это всегда неприятно, особенно в любимой игре. 😩 Ты не одинок в этой проблеме, и я помогу тебе связаться с поддержкой Brawl Stars, даже если кажется, что все пути отрезаны.</p><p>🤯 Проблема с доступом к поддержке</p><p>Ты столкнулся с трудностями при обращении в поддержку: бот отклоняет твои запросы, а прямой чат исчезает. 👻 К сожалению, Supercell ограничила доступ к поддержке для пользователей из России и Беларуси.</p><p>Но не отчаивайся! 🙌 Есть несколько способов обойти эту блокировку.</p><p>🗺 Смена региона в настройках устройства</p><p>🔥 Самый эффективный способ - сменить регион устройства на страну, где поддержка Brawl Stars доступна:</p><p>1. 🍏 Для iOS:</p><p>🔥 Открой "Настройки" -&gt; "Основные" -&gt; "Язык и регион".</p><p>🔥 Выбери "Соединённые Штаты Америки" или любую другую страну, кроме России и Беларуси.</p><p>🔥 Перезагрузи устройство.</p><p>2. 🤖 Для Android:</p><p>🔥 Инструкция может отличаться в зависимости от модели устройства и версии Android.</p><p>🔥 Найди в "Настройках" раздел, связанный с регионом или языком.</p><p>🔥 Измени регион на США или другую страну, где поддержка доступна.</p><p>🔥 Перезагрузи устройство.</p><p>💬 Обращение в поддержку через игру</p><p>1. Запусти Brawl Stars.</p><p>2. Открой "Настройки".</p><p>3. Выбери "Помощь и поддержка".</p><p>4. Нажми на синюю кнопку чата в правом верхнем углу.</p><p>5. Выбери подходящую категорию проблемы.</p><p>6. Опиши свою ситуацию максимально подробно и четко.</p><p>7. Предоставь всю необходимую информацию: свой тег игрока, адрес электронной почты, описание проблемы и скриншоты, если это уместно.</p><p>8. Будь вежлив и терпелив. 😊</p><p>📨 Альтернативный вариант: форма обратной связи</p><p>Если чат в игре недоступен, попробуй воспользоваться формой обратной связи на сайте Supercell (<a href="https://support.supercell.com/brawl-stars/ru/articles/contact-form.html" rel="noopener noreferrer" target="_blank">https://support.supercell.com/brawl-stars/ru/articles/contact-form.html</a>).</p><p>❓ Ответы на вопросы</p><p>1. Как долго ждать ответа от поддержки?</p><p>Время ожидания ответа может варьироваться. ⏳ Обычно Supercell отвечает в течение нескольких дней, но иногда это может занять больше времени, особенно при большой загруженности.</p><p>2. Что делать, если поддержка отказала в помощи?</p><p>Внимательно изучи ответ поддержки. Возможно, ты упустил какую-то важную информацию или не предоставил достаточные доказательства.</p><p>Попробуй обратиться повторно, более четко сформулировав свою проблему и предоставив дополнительные доказательства. 💪</p><p>👍 Полезные советы</p><p>🔥 🇬🇧 Попробуй сменить язык в игре на английский. Это может увеличить шансы на получение ответа от поддержки.</p><p>🔥 📸 Сделай скриншоты, подтверждающие твою проблему, например, потерянный аккаунт.</p><p>🔥 📑 Сохрани переписку с поддержкой. Это может пригодиться в дальнейшем.</p><p>📌 Выводы</p><p>Обращение в поддержку Brawl Stars из России может быть непростым, но не невозможным. 💪 Смени регион устройства и следуй моим рекомендациям - и ты сможешь восстановить свой аккаунт! 💥</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/Kak-napisat-v-podderzhku-Supercell-08-27" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-7-discord">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-7-discord-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-7-discord-title">СПОСОБЫ ПОЛУЧЕНИЯ 7 ЗНАЧКОВ В DISCORD</h3>
+<div class="modal-content"><p>Сегодня я расскажу вам о всех значках которые существуют в дискорде на данный момент, а также поведаю об условиях их получения. Вот так они все выглядят:</p><p>Теперь подробнее про каждый…</p><p>1. Первый значок у нас – это значок HypeSquad.</p><p>Его можно получить, если зайдя в настройки прийти опрос для становления частью одноимённой группы пользователей. Этот значок не даёт чего-то сверхъестественного, как говорит нам сам дискорд, мы получаем:</p><p>Есть, также такие разновидности этого значка:</p><p>2. Второй значок – это уже действительно испытание. Данный значок даётся разработчикам дискорда.</p><p>Чтобы его получить к себе в профиль вы должны перейти на сайте дискорда и подать туда своё резюме, следовательно, нужно стать одним из разработчиков.</p><p><a href="https://discordapp.com/jobs" rel="noopener noreferrer" target="_blank">https://discordapp.com/jobs</a><span class="inline-vpn">🔒 Только с VPN</span></p><p>3. Третий значок предназначен для партнеров дискорда.</p><p>Для получения значка нужно стать партнёром компании и выполнить ряд условий. Сейчас вы видите критерии принятия в партнерскую программу для вас</p><p>Подробнее: <a href="https://support.discord.com/hc/ru/articles/115001494012" rel="noopener noreferrer" target="_blank">https://support.discord.com/hc/ru/articles/115001494012</a><span class="inline-vpn">🔒 Только с VPN</span></p><p>Как плюс вы получите: доступ к серверу где сидят такие же известные партнеры Дискорда как и вы, а также у вас будет свой VIP-сервер, что это такое вы сможете найти на официальном сайте Дискорд.</p><p>4. Четвёртый значок под названием Happy Sport Events. Если вам больше 16 лет, то вы можете записать видео ролик (обязательно с вашим лицом) и там ответить на вопросы по следующей ссылке (скопируйте, чтобы открыть):</p><p><a href="https://discord.com/hypesquad" rel="noopener noreferrer" target="_blank">https://discord.com/hypesquad</a><span class="inline-vpn">🔒 Только с VPN</span></p><p>Главное, это проявить креативность, тогда вас точно заметят и примут, однако ждать придется от 1 до 3 месяцев, так что готовьтесь!</p><p>5. Пятым идёт значок под названием Discord Bug Hunter.</p><p>Он дается тем, кто находит баги и иные ошибки в дискорде, и отправляет их в техническую поддержку на исправление, тем самым делая Дискорд всё лучше и лучше.</p><p>6. Значок клинков Gold HypeSquad Balance был вручен всем участникам</p><p>HypeSquad Balance в рамках турнира Discord King of the Hat HypeSquad, который был объявлен 18 февраля 2019 года.</p><p>Это объявление также включала новости о том, что King of the Hat, являющейся первым на Discord, было бесплатный в течение недели. 19 марта 2019 года все участники HypeSquad Balance были награждены значком King of the Hat HypeSquad.</p><p>7. И последний значок - символ подписчиков Discord Nitro. На данный момент вполне доступен.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/SPOSOBY-POLUCHENIYA-7-ZNACHKOV-V-DISCORD-02-15" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-20">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-20-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-20-title">ЛЮБОЙ ЗНАЧОК ГИЛЬДИИ 20 + ЗНАЧКОВ</h3>
+<div class="modal-content"><p>🎆Здравствуйте, чтобы получить тег вам нужно перейди по ссылке, и пройди регистрацию.</p><p>🌆После этого зайдите настройки пользователь -&gt; Профили -&gt; и снизу будет тег сервера.</p><ol class="modal-list"><li><a href="https://discord.gg/tibo" rel="noopener noreferrer" target="_blank">[cute] https://discord.gg/tibo</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/gca" rel="noopener noreferrer" target="_blank">[PRO] https://discord.gg/gca</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/polarguild" rel="noopener noreferrer" target="_blank">[POLR] https://discord.gg/polarguild</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/emh" rel="noopener noreferrer" target="_blank">[EMH] https://discord.gg/emh</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/celestrials" rel="noopener noreferrer" target="_blank">[SOUL] https://discord.gg/celestrials</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/dualview" rel="noopener noreferrer" target="_blank">[DUAL] https://discord.gg/dualview</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/la-cueva-de-cosi-844285068275875890" rel="noopener noreferrer" target="_blank">[BRUH] https://discord.gg/la-cueva-de-cosi-844285068275875890</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/nico-vip" rel="noopener noreferrer" target="_blank">[VIP] https://discord.gg/nico-vip</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/soulobby" rel="noopener noreferrer" target="_blank">[Soul] https://discord.gg/soulobby</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/moco" rel="noopener noreferrer" target="_blank">[moco] https://discord.gg/moco</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/cyberinfo" rel="noopener noreferrer" target="_blank">[CYBR] https://discord.gg/cyberinfo</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/valcraft" rel="noopener noreferrer" target="_blank">[VALC] https://discord.gg/valcraft</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/valorantil" rel="noopener noreferrer" target="_blank">[EZ] https://discord.gg/valorantil</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/solarballs" rel="noopener noreferrer" target="_blank">[STAR] https://discord.gg/solarballs</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/kCh734XdZv" rel="noopener noreferrer" target="_blank">[RAWR] https://discord.gg/kCh734XdZv</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/lgbtqia" rel="noopener noreferrer" target="_blank">[LGBT] https://discord.gg/lgbtqia</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/titsrp" rel="noopener noreferrer" target="_blank">[TIT] https://discord.gg/titsrp</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/shaun" rel="noopener noreferrer" target="_blank">[MEOW] https://discord.gg/shaun</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/pupy" rel="noopener noreferrer" target="_blank">[OWO] https://discord.gg/pupy</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/jb" rel="noopener noreferrer" target="_blank">[IOS] https://discord.gg/jb</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/sanic" rel="noopener noreferrer" target="_blank">[CAT] https://discord.gg/sanic</a><span class="inline-vpn">🔒 Только с VPN</span></li><li><a href="https://discord.gg/reactionroles" rel="noopener noreferrer" target="_blank">[DEV] https://discord.gg/reactionroles</a><span class="inline-vpn">🔒 Только с VPN</span></li></ol></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/DEMF-04-30" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="modal-among-us">
+<div class="modal-backdrop" data-close="1"></div>
+<div aria-labelledby="modal-among-us-title" aria-modal="true" class="modal-panel" role="dialog">
+<button aria-label="Закрыть" class="modal-close" data-close="1" type="button">×</button>
+<h3 class="modal-title" id="modal-among-us-title">ГАЙД ДЛЯ НОВИЧКОВ ПО ИГРЕ AMONG US</h3>
+<div class="modal-content"><p>Among Us - многопользовательская игра для 4-10 человек, где в каждом раунде игроки получают одну из двух ролей: член экипажа или предатель. Задача экипажа - выполнять задания, замечать подозрительное поведение и через голосование вычислить предателей. Задача предателя - устранять экипаж, саботировать работу корабля и не дать другим закончить задания.</p><h4>Что важно в начале</h4><p>Для ПК удобно включить комбинированное управление мышью и клавиатурой. Стоит быстро пропускать экран загрузки, чтобы раньше занять выгодную позицию, и как можно раньше выучить названия комнат - так на голосовании будет легче объяснять, где именно вы были и что видели.</p><h4>Как играть за экипаж</h4><p>Не тратьте время впустую и постоянно двигайтесь от одной задачи к другой. Следите за другими игроками: если кто-то только бегает по комнатам и имитирует действия, не повышая общий прогресс, это повод насторожиться. Полезно перемещаться группой, но не слишком плотно - иначе после убийства будет труднее понять, кто именно виноват.</p><p>Обращайте внимание на уникальные анимации заданий - например, на сканирование или отстрел метеоритов. Если игрок реально выполнил такую задачу, это сильный аргумент в его пользу. Не игнорируйте саботаж: реактор, кислород и свет часто решают исход раунда. Карта администратора тоже помогает - по ней можно заметить быстрые перемещения и подозрительные исчезновения.</p><h4>Поведение на голосовании</h4><p>На обсуждении отвечайте коротко и уверенно. Если вы не уверены в виновном, лучше не давить на случайного игрока и при необходимости пропустить голос. Важно не цепляться за прошлые ошибки и не переносить обиды из матча в матч - это только мешает замечать реальные улики.</p><h4>Как играть за предателя</h4><p>Пользуйтесь люками осторожно и только когда уверены, что вас никто не видит. Чтобы не вызывать подозрения, имитируйте выполнение заданий и активно участвуйте в обсуждениях. Сильный саботаж помогает разделять игроков, выключать им свет и создавать удобные условия для убийства и отхода.</p><p>Старайтесь убивать возле люков, не стойте на месте перед саботажем и не действуйте слишком очевидно. Если рядом есть камеры, дождитесь момента, когда за ними никто не следит. Иногда можно сообщить о теле самому, но это уже рискованная тактика - она работает только если вы хорошо чувствуете ситуацию и умеете быстро строить правдоподобную версию событий.</p><h4>Полезные фишки</h4><p>Если кто-то в начале матча делает невозможную в этот момент задачу - значит он фейкует. В медкомнате можно заметить разницу между обычным выходом после сканирования и появлением из люка по направлению взгляда персонажа. А если свидетель увидел, как вы вылезли из люка, он почти наверняка побежит к экстренной кнопке - этим тоже можно воспользоваться.</p><p>Главный принцип простой: за экипаж побеждает внимательность и дисциплина, за предателя - контроль темпа, хорошее прикрытие и умение выглядеть как обычный игрок.</p></div>
+<div class="modal-actions"><a class="origin-btn" href="https://telegra.ph/Gajd-dlya-novichkov-po-igre-Among-us-12-07" rel="noopener noreferrer" target="_blank">Открыть оригинал<span class="vpn-badge origin-vpn-badge">🔒 Только с VPN</span></a></div>
+</div>
+</div>
+<div aria-live="polite" class="toast" id="download-toast"></div>
+<script>
+    (function () {
+      const canvas = document.getElementById('bg-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let width = 0;
+      let height = 0;
+      let dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const particles = [];
+      const PARTICLE_DENSITY = 1 / 32000;
+      let mouseTargetX = 0.5;
+      let mouseTargetY = 0.5;
+      let mouseX = 0.5;
+      let mouseY = 0.5;
+      let scrollCurrent = window.scrollY || 0;
+      let smoothedScrollVelocity = 0;
+      let inertialBoost = 0;
+      let lastObservedScroll = scrollCurrent;
+      const tomatoImage = new Image();
+      tomatoImage.src = "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D'http%3A//www.w3.org/2000/svg'%20viewBox%3D'0%200%2064%2064'%3E%3Cg%20fill%3D'%23ff6cbf'%3E%3Cpath%20d%3D'M32%2013c-3.8-5.2-9.4-6.6-14.2-3.5%202.6%201.1%204.7%202.9%205.9%205.7-4.1-.9-8%20.4-10.9%204%203.6-.3%206.6.6%209%203-12%204.4-18.6%2014.5-16.6%2024.9C7.5%2058.1%2018.7%2066%2032%2066s24.5-7.9%2026.8-18.9c2-10.4-4.6-20.5-16.6-24.9%202.4-2.4%205.4-3.3%209-3-2.9-3.6-6.8-4.9-10.9-4%201.2-2.8%203.3-4.6%205.9-5.7C41.4%206.4%2035.8%207.8%2032%2013z'%20transform%3D'translate(0,-6)'/%3E%3Cpath%20d%3D'M15%2019.5c2.3-1.7%205.2-2.6%208.6-2.5-1.8-1.7-2.8-3.6-3.1-5.8%202.3%201%204.1%202.5%205.4%204.8.8-2.2%202.2-4%204.4-5.4-.3%202.6.8%204.7%203.4%206.2%202.6-1.5%203.7-3.6%203.4-6.2%202.2%201.4%203.7%203.2%204.4%205.4%201.3-2.3%203.1-3.8%205.4-4.8-.3%202.2-1.4%204.1-3.1%205.8%203.4-.1%206.3.8%208.6%202.5-1.8.1-3.7.5-5.3%201.6-1.9%201.3-3.1%203-3.8%205.3H24.1c-.7-2.3-1.9-4-3.8-5.3-1.6-1.1-3.5-1.5-5.3-1.6z'/%3E%3C/g%3E%3C/svg%3E";
+      function randomRange(min, max) { return min + Math.random() * (max - min); }
+      function createParticle() {
+        return { baseX: Math.random() * width, baseY: Math.random() * height, vx: randomRange(-0.08, 0.08), vy: randomRange(-0.08, 0.08), size: randomRange(9, 16), alpha: randomRange(0.14, 0.28), drift: randomRange(0.45, 1.0), spin: randomRange(-0.008, 0.008), angle: randomRange(0, Math.PI * 2) };
+      }
+      function createParticles() {
+        particles.length = 0;
+        const count = Math.max(22, Math.min(70, Math.floor(width * height * PARTICLE_DENSITY)));
+        for (let i = 0; i < count; i++) particles.push(createParticle());
+      }
+      function resizeCanvas() {
+        width = window.innerWidth; height = window.innerHeight; dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.floor(width * dpr); canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0); createParticles();
+      }
+      function drawGlow(x, y, size, alpha) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, size * 2.5);
+        gradient.addColorStop(0, `rgba(255, 108, 191, ${alpha * 0.28})`);
+        gradient.addColorStop(1, 'rgba(255, 108, 191, 0)');
+        ctx.fillStyle = gradient; ctx.beginPath(); ctx.arc(x, y, size * 2.5, 0, Math.PI * 2); ctx.fill();
+      }
+      function animate() {
+        const observedScroll = window.scrollY || 0;
+        const instantDelta = observedScroll - lastObservedScroll;
+        lastObservedScroll = observedScroll;
+        mouseX += (mouseTargetX - mouseX) * 0.03;
+        mouseY += (mouseTargetY - mouseY) * 0.03;
+        scrollCurrent += (observedScroll - scrollCurrent) * 0.07;
+        smoothedScrollVelocity = smoothedScrollVelocity * 0.86 + instantDelta * 0.14;
+        inertialBoost = inertialBoost * 0.90 + smoothedScrollVelocity * 0.10;
+        ctx.clearRect(0, 0, width, height);
+        const scrollInfluence = Math.max(-18, Math.min(18, inertialBoost * 0.22));
+        const parallaxShift = (scrollCurrent * 0.035) % (height + 140);
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i]; p.baseX += p.vx; p.baseY += p.vy; p.angle += p.spin;
+          if (p.baseX < -40) p.baseX = width + 20; if (p.baseX > width + 40) p.baseX = -20;
+          if (p.baseY < -40) p.baseY = height + 20; if (p.baseY > height + 40) p.baseY = -20;
+          const mousePushX = (mouseX - 0.5) * 2.5 * p.drift;
+          const mousePushY = (mouseY - 0.5) * 2.5 * p.drift;
+          const drawX = p.baseX + mousePushX;
+          let drawY = p.baseY + mousePushY - parallaxShift + scrollInfluence * 1.25 * p.drift;
+          while (drawY < -80) drawY += height + 160;
+          while (drawY > height + 80) drawY -= height + 160;
+          drawGlow(drawX, drawY, p.size, p.alpha);
+          ctx.save(); ctx.globalAlpha = p.alpha; ctx.translate(drawX, drawY); ctx.rotate(p.angle); ctx.drawImage(tomatoImage, -p.size / 2, -p.size / 2, p.size, p.size); ctx.restore();
+        }
+        for (let i = 0; i < particles.length; i++) {
+          const a = particles[i]; const ax = a.baseX; let ay = a.baseY - parallaxShift + scrollInfluence * 1.25 * a.drift;
+          while (ay < -80) ay += height + 160; while (ay > height + 80) ay -= height + 160;
+          for (let j = i + 1; j < particles.length; j++) {
+            const b = particles[j]; const bx = b.baseX; let by = b.baseY - parallaxShift + scrollInfluence * 1.25 * b.drift;
+            while (by < -80) by += height + 160; while (by > height + 80) by -= height + 160;
+            const dx = ax - bx; const dy = ay - by; const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 110) {
+              const alpha = 0.034 * (1 - dist / 110); ctx.strokeStyle = `rgba(255, 79, 185, ${alpha})`; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      window.addEventListener('resize', resizeCanvas, { passive: true });
+      window.addEventListener('mousemove', (e) => { if (!width || !height) return; mouseTargetX = e.clientX / width; mouseTargetY = e.clientY / height; }, { passive: true });
+      resizeCanvas(); animate();
+    })();
+
+    (function () {
+      const toast = document.getElementById('download-toast');
+      let toastTimer = null;
+      function showToast(text) {
+        toast.textContent = text; toast.classList.add('show'); clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
+      }
+      function openDownload(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+      document.querySelectorAll('.download-link').forEach((link) => {
+        const url = link.dataset.downloadUrl;
+        if (url) {
+          link.href = url;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+        }
+        link.addEventListener('click', (e) => {
+          if (!url) return;
+          e.preventDefault();
+          openDownload(url);
+          showToast('Загрузка открыта в новой вкладке');
+        });
+      });
+      const openModal = (id) => { const modal = document.getElementById(id); if (!modal) return; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false'); document.body.style.overflow = 'hidden'; };
+      const closeModal = (modal) => { if (!modal) return; modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); if (!document.querySelector('.modal.open')) document.body.style.overflow = ''; };
+      document.querySelectorAll('.modal-link').forEach((link) => { link.addEventListener('click', (e) => { e.preventDefault(); openModal(link.dataset.modal); }); });
+      document.querySelectorAll('.modal').forEach((modal) => {
+        modal.addEventListener('click', (e) => { if (e.target && e.target.closest('[data-close="1"]')) closeModal(modal); });
+      });
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelectorAll('.modal.open').forEach(closeModal); });
+    })();
+  </script>
+</body>
+</html>
